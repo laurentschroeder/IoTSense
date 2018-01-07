@@ -6,7 +6,6 @@
  */
 
 #include "stm32f0xx_hal.h"
-#include "ambient_light_sensor.h"
 
 #define SLAVE_ADDRESS 0x60
 
@@ -146,25 +145,27 @@ static void WriteToRegister(uint8_t reg, uint8_t value)
 static void ParamSet(uint8_t address, uint8_t value)
 {
     WriteToRegister(PARAM_WR, value);
+    WriteToRegister(COMMAND,0x00);
+    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, PARAM_SET | address);
 }
 
 static uint8_t ParamGet(uint8_t address)
 {
+    WriteToRegister(COMMAND,0x00);
+    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, PARAM_QUERY | address);
     uint8_t message = ReadFromRegister(PARAM_RD);
     return message;
 }
 
-void si1145_reset()
-{
-    WriteToRegister(COMMAND, RESET);
-}
-
 void si1145_init()
 {
+    WriteToRegister(COMMAND, RESET);
+    HAL_Delay(10);
+
     WriteToRegister(HW_KEY, 0x17);
-    HAL_Delay(150);
+    HAL_Delay(10);
     WriteToRegister(MEAS_RATE0,0x00);
     WriteToRegister(MEAS_RATE1,0x00);
     ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_511);
@@ -175,18 +176,18 @@ void si1145_init()
     WriteToRegister(UCOEF1, 0x6B);
     WriteToRegister(UCOEF2, 0x01);
     WriteToRegister(UCOEF3, 0x00);
-    //ParamSet(CHLIST, EN_ALS_VIS|EN_UV);
+    ParamSet(CHLIST, EN_ALS_VIS|EN_UV);
 }
 
-void trigger()
+void si1145_force()
 {
+    WriteToRegister(COMMAND,0x00);
+    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, ALS_FORCE);
-    HAL_Delay(150);
 }
 
 uint16_t si1145_getVisible()
 {
-    trigger();
     uint16_t data = 0;
     uint8_t vis0 = ReadFromRegister(ALS_VIS_DATA0);
     uint8_t vis1 = ReadFromRegister(ALS_VIS_DATA1);
@@ -194,12 +195,21 @@ uint16_t si1145_getVisible()
     return data;
 }
 
+uint16_t si1145_getIR()
+{
+    uint16_t data = 0;
+    uint8_t ir0 = ReadFromRegister(ALS_IR_DATA0);
+    uint8_t ir1 = ReadFromRegister(ALS_IR_DATA1);
+    data = ir0 | (uint16_t)(ir1 << 8);
+    return data;
+}
+
 uint16_t si1145_getUVIndex()
 {
-    trigger();
-    uint8_t vis0 = ReadFromRegister(UVINDEX0);
-	uint8_t vis1 = ReadFromRegister(UVINDEX1);
-	uint16_t data = (uint16_t)vis0 | (vis1 << 8);
+    uint16_t data = 0;
+    uint8_t uv0 = ReadFromRegister(UVINDEX0);
+	uint8_t uv1 = ReadFromRegister(UVINDEX1);
+	data = (uint16_t)uv0 | (uv1 << 8);
 	return data;
 }
 
@@ -210,6 +220,8 @@ uint8_t si1145_getResponse()
 
 void si1145_sendNOP()
 {
+    WriteToRegister(COMMAND,0x00);
+    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, NOP);
 }
 
