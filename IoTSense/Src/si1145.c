@@ -104,8 +104,8 @@
 #define VIS_RANGE_HIGH      0x20
 
 #define ALS_IR_ADC_MISC     0x1F
-#define IR_RANGE_NORMAL     0x00
-#define IR_RANGE_HIGH       0x20
+#define IR_RANGE_NORMAL     0x0F
+#define IR_RANGE_HIGH       0x1F
 
 #define ALS_IR_ADC_COUNTER  0x1D
 #define IR_ADC_Clock_1      0x00    //50 ns times 2^ALS_IR_ADC_GAIN
@@ -123,10 +123,6 @@
 #define IR_ADC_CLOCK_DIV16     0x04
 #define IR_ADC_CLOCK_DIV64     0x06
 #define IR_ADC_CLOCK_DIV128    0x07
-
-#define ALS_IR_ADC_MISC     0x1F
-#define IR_RANGE_NORMAL     0x0F
-#define IR_RANGE_HIGH       0x1F       //Gain divided by 14.5
 
 extern I2C_HandleTypeDef hi2c1;
 
