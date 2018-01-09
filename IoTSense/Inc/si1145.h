@@ -17,7 +17,7 @@ uint16_t si1145_getUVIndex();
 uint8_t si1145_getResponse();
 void si1145_sendNOP();
 char* si1145_getStatus();
-void si1145_force();
+
 
 
 #endif /* SI1145_H_ */

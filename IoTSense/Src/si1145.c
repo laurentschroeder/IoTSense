@@ -8,8 +8,10 @@
 #include "stm32f0xx_hal.h"
 
 #define SLAVE_ADDRESS 0x60
+#define ADC_OFFSET 255
 
 // registers
+#define SEQ_ID          0x02
 #define HW_KEY          0x07
 #define MEAS_RATE0      0x08
 #define MEAS_RATE1      0x09
@@ -53,6 +55,7 @@
 
 #define PSLED12_SELECT  0x02
 #define LED1_ENABLE     0x01
+#define LED1_OFF        0x00
 
 #define PS_ADC_COUNTER  0x0A
 #define PS_ADC_Clock_1     0x00    //50 ns times 2^PS_ADC_GAIN
@@ -91,6 +94,7 @@
 
 #define ALS_VIS_ADC_GAIN    0x11
 #define VIS_ADC_CLOCK_DIV1      0x00
+#define VIS_ADC_CLOCK_DIV2      0x01
 #define VIS_ADC_CLOCK_DIV16     0x04
 #define VIS_ADC_CLOCK_DIV64     0x06
 #define VIS_ADC_CLOCK_DIV128    0x07
@@ -99,9 +103,9 @@
 #define VIS_RANGE_NORMAL    0x00
 #define VIS_RANGE_HIGH      0x20
 
-#define ALS_IR_ADC_MISC		0x1F
-#define IR_RANGE_NORMAL		0x00
-#define IR_RANGE_HIGH		0x20
+#define ALS_IR_ADC_MISC     0x1F
+#define IR_RANGE_NORMAL     0x00
+#define IR_RANGE_HIGH       0x20
 
 #define ALS_IR_ADC_COUNTER  0x1D
 #define IR_ADC_Clock_1      0x00    //50 ns times 2^ALS_IR_ADC_GAIN
@@ -115,13 +119,14 @@
 
 #define ALS_IR_ADC_GAIN        0x1E
 #define IR_ADC_CLOCK_DIV1      0x00
+#define IR_ADC_CLOCK_DIV2      0x01
 #define IR_ADC_CLOCK_DIV16     0x04
 #define IR_ADC_CLOCK_DIV64     0x06
 #define IR_ADC_CLOCK_DIV128    0x07
 
 #define ALS_IR_ADC_MISC     0x1F
-#define IR_RANGE_NORMAL     0x00
-#define IR_RANGE_HIGH       0x20    //Gain divided by 14.5
+#define IR_RANGE_NORMAL     0x0F
+#define IR_RANGE_HIGH       0x1F       //Gain divided by 14.5
 
 extern I2C_HandleTypeDef hi2c1;
 
@@ -129,6 +134,7 @@ static uint8_t ReadFromRegister(uint8_t reg);
 static void WriteToRegister(uint8_t reg, uint8_t value);
 static void ParamSet(uint8_t address, uint8_t value);
 static uint8_t ParamGet(uint8_t address);
+static void si1145_force();
 
 static uint8_t ReadFromRegister(uint8_t reg)
 {
@@ -168,49 +174,83 @@ void si1145_init()
     HAL_Delay(10);
     WriteToRegister(MEAS_RATE0,0x00);
     WriteToRegister(MEAS_RATE1,0x00);
-    ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_511);
-    ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV128);
+
+
+    ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_255);
+    ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV2);
     ParamSet(ALS_VIS_ADC_MISC, VIS_RANGE_NORMAL);
-    ParamSet(ALS_IR_ADC_MISC, IR_RANGE_NORMAL);
+
+    ParamSet(ALS_IR_ADC_COUNTER, IR_ADC_Clock_255);
+    ParamSet(ALS_IR_ADC_GAIN, IR_ADC_CLOCK_DIV2);
+
+    /*
+     * Set IR RANGE in bit-field 5
+     * bits 4:0 need to be preserved
+     */
+    uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
+    ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_NORMAL);
+
+    ParamSet(PSLED12_SELECT, LED1_OFF);
+
     WriteToRegister(UCOEF0, 0x7B);
     WriteToRegister(UCOEF1, 0x6B);
     WriteToRegister(UCOEF2, 0x01);
     WriteToRegister(UCOEF3, 0x00);
-    ParamSet(CHLIST, EN_ALS_VIS|EN_UV);
 }
 
-void si1145_force()
+static void si1145_force()
 {
     WriteToRegister(COMMAND,0x00);
     while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, ALS_FORCE);
+    HAL_Delay(5);
 }
 
 uint16_t si1145_getVisible()
 {
+    ParamSet(CHLIST, EN_ALS_VIS);
+    si1145_force();
     uint16_t data = 0;
     uint8_t vis0 = ReadFromRegister(ALS_VIS_DATA0);
     uint8_t vis1 = ReadFromRegister(ALS_VIS_DATA1);
     data = vis0 | (uint16_t)(vis1 << 8);
-    return data;
+    if(ADC_OFFSET > data)
+    {
+        return 0;
+    }
+    else
+    {
+        return data - ADC_OFFSET;
+    }
 }
 
 uint16_t si1145_getIR()
 {
+    ParamSet(CHLIST, EN_ALS_IR);
+    si1145_force();
     uint16_t data = 0;
     uint8_t ir0 = ReadFromRegister(ALS_IR_DATA0);
     uint8_t ir1 = ReadFromRegister(ALS_IR_DATA1);
     data = ir0 | (uint16_t)(ir1 << 8);
-    return data;
+    if(ADC_OFFSET > data)
+    {
+        return 0;
+    }
+    else
+    {
+        return data - ADC_OFFSET;
+    }
 }
 
 uint16_t si1145_getUVIndex()
 {
+    ParamSet(CHLIST, EN_UV);
+    si1145_force();
     uint16_t data = 0;
     uint8_t uv0 = ReadFromRegister(UVINDEX0);
-	uint8_t uv1 = ReadFromRegister(UVINDEX1);
-	data = (uint16_t)uv0 | (uv1 << 8);
-	return data;
+    uint8_t uv1 = ReadFromRegister(UVINDEX1);
+    data = (uint16_t)uv0 | (uv1 << 8);
+    return data;
 }
 
 uint8_t si1145_getResponse()
