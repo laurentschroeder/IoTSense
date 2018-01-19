@@ -147,15 +147,11 @@ static void WriteToRegister(uint8_t reg, uint8_t value)
 static void ParamSet(uint8_t address, uint8_t value)
 {
     WriteToRegister(PARAM_WR, value);
-    WriteToRegister(COMMAND,0x00);
-    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, PARAM_SET | address);
 }
 
 static uint8_t ParamGet(uint8_t address)
 {
-    WriteToRegister(COMMAND,0x00);
-    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, PARAM_QUERY | address);
     uint8_t message = ReadFromRegister(PARAM_RD);
     return message;
@@ -168,9 +164,6 @@ void si1145_init()
 
     WriteToRegister(HW_KEY, 0x17);
     HAL_Delay(10);
-    WriteToRegister(MEAS_RATE0,0x00);
-    WriteToRegister(MEAS_RATE1,0x00);
-
 
     ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_255);
     ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV2);
@@ -196,8 +189,6 @@ void si1145_init()
 
 static void si1145_force()
 {
-    WriteToRegister(COMMAND,0x00);
-    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, ALS_FORCE);
     HAL_Delay(5);
 }
@@ -256,14 +247,7 @@ uint8_t si1145_getResponse()
 
 void si1145_sendNOP()
 {
-    WriteToRegister(COMMAND,0x00);
-    while(ReadFromRegister(RESPONSE) != 0x00);
     WriteToRegister(COMMAND, NOP);
-}
-
-void calibrate()
-{
-
 }
 
 char* si1145_getStatus()
