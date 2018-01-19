@@ -1,2 +1,5 @@
 /Debug/
 /Drivers/
+/IoTSense.elf.launch
+/mx.scratch
+/STM32F072VB_FLASH.ld
