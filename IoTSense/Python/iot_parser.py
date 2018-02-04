@@ -1,7 +1,12 @@
 # IOT sensor value parser
 from math import pow
+from terminaltables import SingleTable
+import os
 
 temperature = 0
+humidity = 0
+visible = 0
+ir = 0
 
 
 def parse(received_bytes):
@@ -11,27 +16,65 @@ def parse(received_bytes):
         calc_humidity(sensor_value)
     elif sensor == 2:
         calc_temperature(sensor_value)
+    elif sensor == 3:
+        calc_visible(sensor_value)
+    elif sensor == 4:
+        calc_ir(sensor_value)
+    draw_table()
 
 
 def calc_humidity(sensor_value):
-    humidity = (sensor_value / 16) - 24
+    humidity_raw = (sensor_value / 16) - 24
 
     # linearization:
     a0 = -4.7844
     a1 = 0.4008
     a2 = -0.00393
-    humidity_linear = humidity - (pow(humidity, 2) * a2 + humidity * a1 + a0)
+    humidity_linear = humidity_raw - (pow(humidity_raw, 2) * a2 + humidity_raw * a1 + a0)
 
     # temperature compensation
     q0 = 0.1973
     q1 = 0.00237
     humidity_compensated = humidity_linear + ((temperature - 30)) * (humidity_linear * q1 + q0)
-
-    print("RH:\t\t\t", round(humidity_compensated, 2), "%")
+    global humidity
+    humidity = humidity_compensated
 
 
 def calc_temperature(sensor_value):
     global temperature
     temperature = (sensor_value / 32) - 50
-    print("Temperatur:\t", round(temperature, 2), "°C")
+
+
+def calc_visible(sensor_value):
+    global visible
+    visible = sensor_value
+    visible /= 0.282
+
+
+def calc_ir(sensor_value):
+    global ir
+    ir = sensor_value
+    ir /= 2.44
+
+
+def draw_table():
+    a = str(round(temperature, 2))
+    b = str(round(humidity, 2))
+    c = str(round(visible))
+    d = str(round(ir))
+
+    TABLE_DATA = (
+        ('Sensor', 'Wert', 'Einheit'),
+        ('Temperatur', a, '°C'),
+        ('Feuchtigkeit', b, '%'),
+        ('Sichtbares Licht', c, 'lx'),
+        ('Infrarot', d, 'lx'),
+    )
+
+    table_instance = SingleTable(TABLE_DATA, "IoT Sensors")
+    table_instance.justify_columns[3] = 'right'
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(table_instance.table, end='\r')
+
+    #os.system('clear')
 
