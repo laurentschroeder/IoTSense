@@ -7,19 +7,29 @@ temperature = 0
 humidity = 0
 visible = 0
 ir = 0
+hp206c_temperature = 0
+pressure = 0
+height = 0
 
 
 def parse(received_bytes):
     sensor = int(received_bytes[0])
-    sensor_value = int.from_bytes(received_bytes[1:3], byteorder='big')
+    sensor_value_16 = int.from_bytes(received_bytes[1:3], byteorder='big')
+    sensor_value_24 = int.from_bytes(received_bytes[1:4], byteorder='big')
     if sensor == 1:
-        calc_humidity(sensor_value)
+        calc_humidity(sensor_value_16)
     elif sensor == 2:
-        calc_temperature(sensor_value)
+        calc_temperature(sensor_value_16)
     elif sensor == 3:
-        calc_visible(sensor_value)
+        calc_visible(sensor_value_16)
     elif sensor == 4:
-        calc_ir(sensor_value)
+        calc_ir(sensor_value_16)
+    elif sensor == 5:
+        calc_hp206c_temperature(sensor_value_24)
+    elif sensor == 6:
+        calc_hp206c_pressure(sensor_value_24)
+    elif sensor == 7:
+        calc_hp206c_height(sensor_value_24)
     draw_table()
 
 
@@ -57,11 +67,29 @@ def calc_ir(sensor_value):
     ir /= 2.44
 
 
+def calc_hp206c_temperature(sensor_value):
+    global hp206c_temperature
+    hp206c_temperature = sensor_value / 100
+
+
+def calc_hp206c_pressure(sensor_value):
+    global pressure
+    pressure = sensor_value / 100
+
+
+def calc_hp206c_height(sensor_value):
+    global height
+    height = sensor_value / 100
+
+
 def draw_table():
     a = str(round(temperature, 2))
     b = str(round(humidity, 2))
     c = str(round(visible))
     d = str(round(ir))
+    e = str(round(hp206c_temperature, 2))
+    f = str(round(pressure))
+    g = str(round(height, 2))
 
     TABLE_DATA = (
         ('Sensor', 'Wert', 'Einheit'),
@@ -69,6 +97,9 @@ def draw_table():
         ('Feuchtigkeit', b, '%'),
         ('Sichtbares Licht', c, 'lx'),
         ('Infrarot', d, 'lx'),
+        ('Temperatur hp206c', e, '°C'),
+        ('Luftdruck', f, 'mbar'),
+        ('Höhe', g, 'm'),
     )
 
     table_instance = SingleTable(TABLE_DATA, "IoT Sensors")
