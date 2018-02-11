@@ -193,7 +193,7 @@ static void si1145_force()
     HAL_Delay(5);
 }
 
-uint16_t si1145_getVisible()
+uint32_t si1145_getVisible()
 {
     ParamSet(CHLIST, EN_ALS_VIS);
     si1145_force();
@@ -211,7 +211,7 @@ uint16_t si1145_getVisible()
     }
 }
 
-uint16_t si1145_getIR()
+uint32_t si1145_getIR()
 {
     ParamSet(CHLIST, EN_ALS_IR);
     si1145_force();
@@ -229,7 +229,7 @@ uint16_t si1145_getIR()
     }
 }
 
-uint16_t si1145_getUVIndex()
+uint32_t si1145_getUVIndex()
 {
     ParamSet(CHLIST, EN_UV);
     si1145_force();

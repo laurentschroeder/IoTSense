@@ -74,6 +74,7 @@ static void MX_I2C2_Init(void);
 
 /* USER CODE BEGIN 0 */
 void uart_send(uint8_t *transmit_buffer, uint8_t size);
+static void uart_send_formatted(enum E_Sensors sensor);
 /* USER CODE END 0 */
 
 int main(void)
@@ -125,51 +126,54 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-        humidity = th02_get_humidity();
-        transmit_buffer[0] = 0x01;
-        transmit_buffer[1] = humidity >> 8;
-        transmit_buffer[2] = humidity;
-        uart_send(transmit_buffer, 3);
+        uart_send_formatted(TH02_Humidity);
+        uart_send_formatted(TH02_Temperature);
+        uart_send_formatted(SI1145_Visible);
+        uart_send_formatted(SI1145_IR);
+        uart_send_formatted(HP206C_Temperature);
+        uart_send_formatted(HP206C_Presssure);
+        uart_send_formatted(HP206C_Altitude);
 
-        temperature = th02_get_temperature();
-        transmit_buffer[0] = 0x02;
-        transmit_buffer[1] = temperature >> 8;
-        transmit_buffer[2] = temperature;
-        uart_send(transmit_buffer, 3);
 
-        visible_light = si1145_getVisible();
-        transmit_buffer[0] = 0x03;
-        transmit_buffer[1] = visible_light >> 8;
-        transmit_buffer[2] = visible_light;
-        uart_send(transmit_buffer, 3);
-
-        infrared_light = si1145_getVisible();
-        transmit_buffer[0] = 0x04;
-        transmit_buffer[1] = infrared_light >> 8;
-        transmit_buffer[2] = infrared_light;
-        uart_send(transmit_buffer, 3);
-
-        hp206c_performConversion();
-        hp206c_getTemperatureAndPressure(hp206c_sensor_buffer);
-
-        transmit_buffer[0] = 0x05;
-        transmit_buffer[1] = hp206c_sensor_buffer[0];
-        transmit_buffer[2] = hp206c_sensor_buffer[1];
-        transmit_buffer[3] = hp206c_sensor_buffer[2];
-        uart_send(transmit_buffer, 4);
-
-        transmit_buffer[0] = 0x06;
-        transmit_buffer[1] = hp206c_sensor_buffer[3];
-        transmit_buffer[2] = hp206c_sensor_buffer[4];
-        transmit_buffer[3] = hp206c_sensor_buffer[5];
-        uart_send(transmit_buffer, 4);
-
-        hp206c_getAltitude(hp206c_sensor_buffer);
-        transmit_buffer[0] = 0x07;
-        transmit_buffer[1] = hp206c_sensor_buffer[0];
-        transmit_buffer[2] = hp206c_sensor_buffer[1];
-        transmit_buffer[3] = hp206c_sensor_buffer[2];
-        uart_send(transmit_buffer, 4);
+//        temperature = th02_get_temperature();
+//        transmit_buffer[0] = 0x02;
+//        transmit_buffer[1] = temperature >> 8;
+//        transmit_buffer[2] = temperature;
+//        uart_send(transmit_buffer, 3);
+//
+//        visible_light = si1145_getVisible();
+//        transmit_buffer[0] = 0x03;
+//        transmit_buffer[1] = visible_light >> 8;
+//        transmit_buffer[2] = visible_light;
+//        uart_send(transmit_buffer, 3);
+//
+//        infrared_light = si1145_getIR();
+//        transmit_buffer[0] = 0x04;
+//        transmit_buffer[1] = infrared_light >> 8;
+//        transmit_buffer[2] = infrared_light;
+//        uart_send(transmit_buffer, 3);
+//
+//        hp206c_performConversion();
+//        hp206c_getTemperatureAndPressure(hp206c_sensor_buffer);
+//
+//        transmit_buffer[0] = 0x05;
+//        transmit_buffer[1] = hp206c_sensor_buffer[0];
+//        transmit_buffer[2] = hp206c_sensor_buffer[1];
+//        transmit_buffer[3] = hp206c_sensor_buffer[2];
+//        uart_send(transmit_buffer, 4);
+//
+//        transmit_buffer[0] = 0x06;
+//        transmit_buffer[1] = hp206c_sensor_buffer[3];
+//        transmit_buffer[2] = hp206c_sensor_buffer[4];
+//        transmit_buffer[3] = hp206c_sensor_buffer[5];
+//        uart_send(transmit_buffer, 4);
+//
+//        hp206c_getAltitude(hp206c_sensor_buffer);
+//        transmit_buffer[0] = 0x07;
+//        transmit_buffer[1] = hp206c_sensor_buffer[0];
+//        transmit_buffer[2] = hp206c_sensor_buffer[1];
+//        transmit_buffer[3] = hp206c_sensor_buffer[2];
+//        uart_send(transmit_buffer, 4);
 
         HAL_Delay(1000);
     }
@@ -381,8 +385,45 @@ void uart_send(uint8_t *transmit_buffer, uint8_t size)
     HAL_Delay(100);
 }
 
-void uart_format()
+static void uart_send_formatted(enum E_Sensors sensor)
 {
+    uint8_t transmit_buffer[5] = {0};
+    transmit_buffer[0] = sensor;
+    uint32_t data = 0;
+    switch(sensor)
+    {
+        case TH02_Humidity:
+            data = th02_get_humidity();
+            break;
+
+        case TH02_Temperature:
+            data = th02_get_temperature();
+            break;
+
+        case SI1145_Visible:
+            data = si1145_getVisible();
+            break;
+
+        case SI1145_IR:
+            data = si1145_getIR();
+            break;
+
+        case HP206C_Temperature:
+            data = hp206c_getTemperature();
+            break;
+
+        case HP206C_Presssure:
+            data = hp206c_getPressure();
+            break;
+
+    }
+    uint8_t *data_p = (uint8_t *)&data;
+    transmit_buffer[1] = *(data_p);
+    transmit_buffer[2] = *(++data_p);
+    transmit_buffer[3] = *(++data_p);
+    transmit_buffer[4] = *(++data_p);
+    uart_send(transmit_buffer, 5);
+    HAL_Delay(100);
 
 }
 /* USER CODE END 4 */

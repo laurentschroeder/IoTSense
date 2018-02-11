@@ -66,19 +66,32 @@ void hp206c_performConversion()
     HAL_Delay(100);
 }
 
-void hp206c_getTemperatureAndPressure(uint8_t *buffer)
+uint32_t hp206c_getTemperature(void)
 {
-    uint8_t command = READ_PT;
+    uint32_t data = 0;
+    uint8_t command = READ_T;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, buffer, 6, 100);
-    HAL_Delay(2);
+    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
+    return data;
+
 }
 
-void hp206c_getAltitude(uint8_t *buffer)
+uint32_t hp206c_getPressure(void)
 {
+    uint32_t data = 0;
+    uint8_t command = READ_P;
+    HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
+    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
+    return data;
+}
+
+uint32_t hp206c_getAltitude(void)
+{
+    uint32_t data = 0;
     uint8_t command = READ_A;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, buffer, 3, 100);
+    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
+    return data;
 }
 
 static uint8_t hp206c_readRegister(uint8_t reg)
