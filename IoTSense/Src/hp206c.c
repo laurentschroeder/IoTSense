@@ -50,13 +50,6 @@ void hp206c_init()
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
     HAL_Delay(10);
 
-    /*
-    uint8_t status = hp206c_readRegister(INT_SRC);
-    if(!(status & (1<<5)))
-    {
-        hp206c_init();
-    }
-    */
     hp206c_writeRegister(INT_DIR, 0x80);
     hp206c_writeRegister(PA_H_TH_MSB, 0xFF);
     hp206c_writeRegister(PA_M_TH_MSB, 0xA0);
