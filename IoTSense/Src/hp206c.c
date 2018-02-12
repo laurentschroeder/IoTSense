@@ -17,8 +17,8 @@
 #define READ_P          0x30
 #define READ_A          0x31
 #define READ_T          0x32
-#define READ_REG        0x80
-#define WRITE_REG       0xC0
+#define READ_REG_HP206C 0x80
+#define WRITE_REG_HP206C    0xC0
 
 // Config registers
 #define ALT_OFF_LSB     0x00
@@ -44,7 +44,7 @@ static uint8_t hp206c_readRegister(uint8_t reg);
 static void hp206c_writeRegister(uint8_t reg, uint8_t value);
 static uint32_t hp206c_read3Bytes(void);
 
-void hp206c_init()
+void hp206c_init(void)
 {
     uint8_t command;
     command = SOFT_RST;
@@ -60,11 +60,11 @@ void hp206c_init()
     hp206c_writeRegister(T_L_TH, 0x01);
 }
 
-void hp206c_performConversion()
+void hp206c_performConversion(void)
 {
     uint8_t command = ADC_CVT | DSR_1024;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_Delay(100);
+    HAL_Delay(50);
 }
 
 uint32_t hp206c_getTemperature(void)
@@ -88,24 +88,26 @@ uint32_t hp206c_getAltitude(void)
     return hp206c_read3Bytes();
 }
 
+static void hp206c_writeRegister(uint8_t reg, uint8_t value)
+{
+    uint8_t command[2];
+    command[0] = WRITE_REG_HP206C | reg;
+    command[1] = value;
+    HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, command, 2, 100);
+}
+
+/*
+
 static uint8_t hp206c_readRegister(uint8_t reg)
 {
-    uint8_t transmit_data = READ_REG | reg;
+    uint8_t transmit_data = READ_REG_HP206C | reg;
     uint8_t receive_data = 0;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &transmit_data, 1, 100);
     HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &receive_data, 1, 100);
     return receive_data;
 }
 
-static void hp206c_writeRegister(uint8_t reg, uint8_t value)
-{
-    uint8_t command[2];
-    command[0] = WRITE_REG | reg;
-    command[1] = value;
-    HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, command, 2, 100);
-}
-
-void hp206c_debug(uint8_t *buffer)
+static void hp206c_debug(uint8_t *buffer)
 {
     buffer[0] = hp206c_readRegister(T_H_TH);
     buffer[1] = hp206c_readRegister(T_M_TH);
@@ -121,6 +123,7 @@ void hp206c_debug(uint8_t *buffer)
     buffer[11] = hp206c_readRegister(INT_SRC);
     buffer[12] = hp206c_readRegister(PARA);
 }
+*/
 
 static uint32_t hp206c_read3Bytes(void)
 {

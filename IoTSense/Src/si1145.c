@@ -6,6 +6,7 @@
  */
 
 #include "stm32f0xx_hal.h"
+#include "si1145.h"
 
 #define SLAVE_ADDRESS 0x60
 #define ADC_OFFSET 255
@@ -130,7 +131,74 @@ static uint8_t ReadFromRegister(uint8_t reg);
 static void WriteToRegister(uint8_t reg, uint8_t value);
 static void ParamSet(uint8_t address, uint8_t value);
 static uint8_t ParamGet(uint8_t address);
-static void si1145_force();
+static void si1145_force(void);
+
+void si1145_init(enum E_Operation operation)
+{
+    WriteToRegister(COMMAND, RESET);
+    HAL_Delay(10);
+
+    WriteToRegister(HW_KEY, 0x17);
+    HAL_Delay(10);
+
+    if(operation == INDOOR)
+    {
+        //Set integration time to 25.6 µs
+        //Resolution 6 lx
+        ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_255);
+        ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV2);
+        ParamSet(ALS_VIS_ADC_MISC, VIS_RANGE_NORMAL);
+
+        ParamSet(ALS_IR_ADC_COUNTER, IR_ADC_Clock_255);
+        ParamSet(ALS_IR_ADC_GAIN, IR_ADC_CLOCK_DIV2);
+
+        /*
+         * Set IR RANGE in bit-field 5
+         * bits 4:0 need to be preserved
+         */
+        uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
+        ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_NORMAL);
+    }
+    else if(operation == OUTDOOR)
+    {
+        //To use in direct sunlight
+        ParamSet(ALS_VIS_ADC_MISC, VIS_RANGE_HIGH);
+
+        /*
+         * Set IR RANGE in bit-field 5
+         * bits 4:0 need to be preserved
+         */
+        uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
+        ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_HIGH);
+
+    }
+    else if(operation == HIGH_SENSITIVE)
+    {
+        //HIGH_SENSITIVE mode, set integration time to 410 µs
+        //Resolution 1 lx
+        ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_127);
+        ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV64);
+        ParamSet(ALS_VIS_ADC_MISC, VIS_RANGE_NORMAL);
+
+        ParamSet(ALS_IR_ADC_COUNTER, IR_ADC_Clock_127);
+        ParamSet(ALS_IR_ADC_GAIN, IR_ADC_CLOCK_DIV64);
+
+        /*
+         * Set IR RANGE in bit-field 5
+         * bits 4:0 need to be preserved
+         */
+        uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
+        ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_NORMAL);
+    }
+
+
+    ParamSet(PSLED12_SELECT, LED1_OFF);
+
+    WriteToRegister(UCOEF0, 0x7B);
+    WriteToRegister(UCOEF1, 0x6B);
+    WriteToRegister(UCOEF2, 0x01);
+    WriteToRegister(UCOEF3, 0x00);
+}
 
 static uint8_t ReadFromRegister(uint8_t reg)
 {
@@ -157,43 +225,15 @@ static uint8_t ParamGet(uint8_t address)
     return message;
 }
 
-void si1145_init()
-{
-    WriteToRegister(COMMAND, RESET);
-    HAL_Delay(10);
 
-    WriteToRegister(HW_KEY, 0x17);
-    HAL_Delay(10);
 
-    ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_255);
-    ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV2);
-    ParamSet(ALS_VIS_ADC_MISC, VIS_RANGE_NORMAL);
-
-    ParamSet(ALS_IR_ADC_COUNTER, IR_ADC_Clock_255);
-    ParamSet(ALS_IR_ADC_GAIN, IR_ADC_CLOCK_DIV2);
-
-    /*
-     * Set IR RANGE in bit-field 5
-     * bits 4:0 need to be preserved
-     */
-    uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
-    ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_NORMAL);
-
-    ParamSet(PSLED12_SELECT, LED1_OFF);
-
-    WriteToRegister(UCOEF0, 0x7B);
-    WriteToRegister(UCOEF1, 0x6B);
-    WriteToRegister(UCOEF2, 0x01);
-    WriteToRegister(UCOEF3, 0x00);
-}
-
-static void si1145_force()
+static void si1145_force(void)
 {
     WriteToRegister(COMMAND, ALS_FORCE);
     HAL_Delay(5);
 }
 
-uint32_t si1145_getVisible()
+uint16_t si1145_getVisible(void)
 {
     ParamSet(CHLIST, EN_ALS_VIS);
     si1145_force();
@@ -211,7 +251,7 @@ uint32_t si1145_getVisible()
     }
 }
 
-uint32_t si1145_getIR()
+uint16_t si1145_getIR(void)
 {
     ParamSet(CHLIST, EN_ALS_IR);
     si1145_force();
@@ -229,7 +269,7 @@ uint32_t si1145_getIR()
     }
 }
 
-uint32_t si1145_getUVIndex()
+uint16_t si1145_getUVIndex(void)
 {
     ParamSet(CHLIST, EN_UV);
     si1145_force();
@@ -240,17 +280,17 @@ uint32_t si1145_getUVIndex()
     return data;
 }
 
-uint8_t si1145_getResponse()
+uint8_t si1145_getResponse(void)
 {
     return ReadFromRegister(RESPONSE);
 }
 
-void si1145_sendNOP()
+void si1145_sendNOP(void)
 {
     WriteToRegister(COMMAND, NOP);
 }
 
-char* si1145_getStatus()
+char* si1145_getStatus(void)
 {
     uint8_t status = ReadFromRegister(CHIP_STAT);
     switch(status)

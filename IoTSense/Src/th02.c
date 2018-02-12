@@ -44,7 +44,7 @@ static void WriteToRegister(uint8_t reg, uint8_t value)
     HAL_I2C_Mem_Write(&hi2c2, SLAVE_ADDRESS<<1, reg, I2C_MEMADD_SIZE_8BIT, &value, 1, 10);
 }
 
-uint32_t th02_get_humidity()
+uint16_t th02_get_humidity()
 {
     WriteToRegister(CONFIG_REG, START);
     while(ReadFromRegister(STATUS_REG) & RDY)
@@ -54,7 +54,7 @@ uint32_t th02_get_humidity()
     return humidity >> 4;
 }
 
-uint32_t th02_get_temperature()
+uint16_t th02_get_temperature()
 {
     WriteToRegister(CONFIG_REG, START | TEMP);
     while(ReadFromRegister(STATUS_REG) & RDY)

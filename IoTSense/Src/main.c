@@ -108,7 +108,7 @@ int main(void)
   MX_I2C2_Init();
 
   /* USER CODE BEGIN 2 */
-  si1145_init();
+  si1145_init(INDOOR);
   hp206c_init();
 
   /* USER CODE END 2 */
