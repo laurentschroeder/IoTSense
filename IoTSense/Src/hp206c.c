@@ -42,6 +42,7 @@ extern I2C_HandleTypeDef hi2c1;
 
 static uint8_t hp206c_readRegister(uint8_t reg);
 static void hp206c_writeRegister(uint8_t reg, uint8_t value);
+static uint32_t hp206c_read3Bytes(void);
 
 void hp206c_init()
 {
@@ -68,30 +69,23 @@ void hp206c_performConversion()
 
 uint32_t hp206c_getTemperature(void)
 {
-    uint32_t data = 0;
     uint8_t command = READ_T;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
-    return data;
-
+    return hp206c_read3Bytes();
 }
 
 uint32_t hp206c_getPressure(void)
 {
-    uint32_t data = 0;
     uint8_t command = READ_P;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
-    return data;
+    return hp206c_read3Bytes();
 }
 
 uint32_t hp206c_getAltitude(void)
 {
-    uint32_t data = 0;
     uint8_t command = READ_A;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, &command, 1, 100);
-    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, &data, 3, 100);
-    return data;
+    return hp206c_read3Bytes();
 }
 
 static uint8_t hp206c_readRegister(uint8_t reg)
@@ -126,4 +120,13 @@ void hp206c_debug(uint8_t *buffer)
     buffer[10] = hp206c_readRegister(INT_CFG);
     buffer[11] = hp206c_readRegister(INT_SRC);
     buffer[12] = hp206c_readRegister(PARA);
+}
+
+static uint32_t hp206c_read3Bytes(void)
+{
+    uint8_t data[3] = {0};
+    uint32_t return_data = 0;
+    HAL_I2C_Master_Receive(&hi2c1, SLAVE_ADDRESS, data, 3, 100);
+    return_data = (data[0] << 16) + (data[1] << 8) + data[2];
+    return return_data;
 }
