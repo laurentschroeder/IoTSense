@@ -45,6 +45,8 @@
 #include "th02.h"
 #include "si1145.h"
 #include "hp206c.h"
+#include "uart.h"
+#include "json.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -56,6 +58,9 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+sensor_type hp206c_temperature;
+sensor_type hp206c_pressure;
+sensor_type hp206c_altitude;
 
 /* USER CODE END PV */
 
@@ -73,8 +78,7 @@ static void MX_I2C2_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void uart_send(uint8_t *transmit_buffer, uint8_t size);
-static void uart_send_formatted(enum E_Sensors sensor);
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -108,8 +112,38 @@ int main(void)
   MX_I2C2_Init();
 
   /* USER CODE BEGIN 2 */
-  si1145_init(INDOOR);
-  hp206c_init();
+    uint8_t json_buffer[1500];
+    //Create sensor_type struct for json
+    hp206c_temperature.id = 1;
+    hp206c_temperature.sub_id = 1;
+    strcpy(hp206c_temperature.name, "hp206c");
+    strcpy(hp206c_temperature.measure_type, "Temperatur");
+    hp206c_temperature.value = 0;
+    strcpy(hp206c_temperature.unit, "°C");
+    strcpy(hp206c_temperature.room, "Wohnzimmer");
+    hp206c_temperature.timestamp = 0;
+
+    hp206c_pressure.id = 1;
+    hp206c_pressure.sub_id = 2;
+    strcpy(hp206c_pressure.name, "hp206c");
+    strcpy(hp206c_pressure.measure_type, "Druck");
+    hp206c_pressure.value = 0;
+    strcpy(hp206c_pressure.unit, "mbar");
+    strcpy(hp206c_pressure.room, "Wohnzimmer");
+    hp206c_pressure.timestamp = 0;
+
+    hp206c_altitude.id = 1;
+    hp206c_altitude.sub_id = 3;
+    strcpy(hp206c_altitude.name, "hp206c");
+    strcpy(hp206c_altitude.measure_type, "Höhe");
+    hp206c_altitude.value = 0;
+    strcpy(hp206c_altitude.unit, "m");
+    strcpy(hp206c_altitude.room, "Wohnzimmer");
+    hp206c_altitude.timestamp = 0;
+
+    hp206c_init();
+    si1145_init(INDOOR);
+
 
   /* USER CODE END 2 */
 
@@ -120,15 +154,11 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-        hp206c_performConversion();
-        uart_send_formatted(TH02_Humidity);
-        uart_send_formatted(TH02_Temperature);
-        uart_send_formatted(SI1145_Visible);
-        uart_send_formatted(SI1145_IR);
-        uart_send_formatted(HP206C_Temperature);
-        uart_send_formatted(HP206C_Presssure);
-        uart_send_formatted(HP206C_Altitude);
-
+        hp206c_temperature.value = hp206c_getTemperature();
+        hp206c_temperature.timestamp = HAL_GetTick();
+        create_json(hp206c_temperature, json_buffer);
+        uart_send(json_buffer);
+        uint16_t size = strlen((char *)json_buffer);
         HAL_Delay(900);
     }
   /* USER CODE END 3 */
@@ -333,57 +363,8 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void uart_send(uint8_t *transmit_buffer, uint8_t size)
-{
-    HAL_UART_Transmit(&huart2, (uint8_t *)transmit_buffer, size, 100);
-    HAL_Delay(100);
-}
 
-static void uart_send_formatted(enum E_Sensors sensor)
-{
-    uint8_t transmit_buffer[5] = {0};
-    transmit_buffer[0] = sensor;
-    uint32_t data = 0;
-    switch(sensor)
-    {
-        case TH02_Humidity:
-            data = th02_get_humidity();
-            break;
 
-        case TH02_Temperature:
-            data = th02_get_temperature();
-            break;
-
-        case SI1145_Visible:
-            data = si1145_getVisible();
-            break;
-
-        case SI1145_IR:
-            data = si1145_getIR();
-            break;
-
-        case HP206C_Temperature:
-            data = hp206c_getTemperature();
-            break;
-
-        case HP206C_Presssure:
-            data = hp206c_getPressure();
-            break;
-
-        case HP206C_Altitude:
-            data = hp206c_getAltitude();
-            break;
-
-    }
-    uint8_t *data_p = (uint8_t *)&data;
-    transmit_buffer[1] = *(data_p);
-    transmit_buffer[2] = *(++data_p);
-    transmit_buffer[3] = *(++data_p);
-    transmit_buffer[4] = *(++data_p);
-    uart_send(transmit_buffer, 5);
-    HAL_Delay(100);
-
-}
 /* USER CODE END 4 */
 
 /**
