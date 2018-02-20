@@ -119,7 +119,7 @@ int main(void)
     strcpy(hp206c_temperature.name, "hp206c");
     strcpy(hp206c_temperature.measure_type, "Temperatur");
     hp206c_temperature.value = 0;
-    strcpy(hp206c_temperature.unit, "°C");
+    strcpy(hp206c_temperature.unit, "\u00B0C");
     strcpy(hp206c_temperature.room, "Wohnzimmer");
     hp206c_temperature.timestamp = 0;
 

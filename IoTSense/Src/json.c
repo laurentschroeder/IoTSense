@@ -12,14 +12,14 @@
 
 void create_json(sensor_type sensor, uint8_t *buffer)
 {
-    sprintf((char *)buffer, "{Sensor ID:%u,"
-            "Sensor Sub ID:%u,"
-            "Sensor:%s,"
-            "Art der Messung:%s,"
-            "Messwert:%ld,"
-            "Einheit:%s,"
-            "Raum:%s,"
-            "Zeitstempel:%ld}",
+    sprintf((char *)buffer, "{\"Sensor ID\":%u,"
+            "\"Sensor Sub ID\":%u,"
+            "\"Sensor\":\"%s\","
+            "\"Art der Messung\":\"%s\","
+            "\"Messwert\":%ld,"
+            "\"Einheit\":\"%s\","
+            "\"Raum\":\"%s\","
+            "\"Zeitstempel\":%ld}",
             sensor.id,
             sensor.sub_id,
             sensor.name,
