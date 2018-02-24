@@ -58,9 +58,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-sensor_type hp206c_temperature;
-sensor_type hp206c_pressure;
-sensor_type hp206c_altitude;
+
 
 /* USER CODE END PV */
 
@@ -112,34 +110,36 @@ int main(void)
   MX_I2C2_Init();
 
   /* USER CODE BEGIN 2 */
-    uint8_t json_buffer[1500];
-    //Create sensor_type struct for json
-    hp206c_temperature.id = 1;
-    hp206c_temperature.sub_id = 1;
-    strcpy(hp206c_temperature.name, "hp206c");
-    strcpy(hp206c_temperature.measure_type, "Temperatur");
-    hp206c_temperature.value = 0;
-    strcpy(hp206c_temperature.unit, "\u00B0C");
-    strcpy(hp206c_temperature.room, "Wohnzimmer");
-    hp206c_temperature.timestamp = 0;
+    uint8_t json_buffer[180];
 
-    hp206c_pressure.id = 1;
-    hp206c_pressure.sub_id = 2;
-    strcpy(hp206c_pressure.name, "hp206c");
-    strcpy(hp206c_pressure.measure_type, "Druck");
-    hp206c_pressure.value = 0;
-    strcpy(hp206c_pressure.unit, "mbar");
-    strcpy(hp206c_pressure.room, "Wohnzimmer");
-    hp206c_pressure.timestamp = 0;
+    json_obj hp206c_temperature;
+    json_obj hp206c_pressure;
+    json_obj hp206c_altitude;
+    json_obj si1145_vis;
+    json_obj si1145_ir;
+    json_obj th02_humidity;
+    json_obj th02_temperature;
 
-    hp206c_altitude.id = 1;
-    hp206c_altitude.sub_id = 3;
-    strcpy(hp206c_altitude.name, "hp206c");
-    strcpy(hp206c_altitude.measure_type, "Höhe");
-    hp206c_altitude.value = 0;
-    strcpy(hp206c_altitude.unit, "m");
-    strcpy(hp206c_altitude.room, "Wohnzimmer");
-    hp206c_altitude.timestamp = 0;
+    create_json_object(&hp206c_temperature, 1, 1,
+            "hp206c", "Temperatur", "\u00B0C", "Wohnzimmer");
+
+    create_json_object(&hp206c_pressure, 1, 2,
+            "hp206c", "Druck", "mbar", "Wohnzimmer");
+
+    create_json_object(&hp206c_altitude, 1, 3,
+            "hp206c", "Hoehe", "m", "Wohnzimmer");
+
+    create_json_object(&si1145_vis, 2, 1,
+            "si1145", "Licht", "lx", "Wohnzimmer");
+
+    create_json_object(&si1145_ir, 2, 2,
+            "si1145", "Infrarot", "lx", "Wohnzimmer");
+
+    create_json_object(&th02_humidity, 3, 1,
+            "th02", "Feuchtigkeit", "%RH", "Wohnzimmer");
+
+    create_json_object(&th02_temperature, 3, 2,
+            "th02", "Temperatur", "\u00B0C", "Wohnzimmer");
 
     hp206c_init();
     si1145_init(INDOOR);
@@ -156,10 +156,41 @@ int main(void)
   /* USER CODE BEGIN 3 */
         hp206c_temperature.value = hp206c_getTemperature();
         hp206c_temperature.timestamp = HAL_GetTick();
-        create_json(hp206c_temperature, json_buffer);
+        create_json_string(hp206c_temperature, json_buffer);
         uart_send(json_buffer);
+
+        hp206c_pressure.value = hp206c_getPressure();
+        hp206c_pressure.timestamp = HAL_GetTick();
+        create_json_string(hp206c_pressure, json_buffer);
+        uart_send(json_buffer);
+
+        hp206c_altitude.value = hp206c_getAltitude();
+        hp206c_altitude.timestamp = HAL_GetTick();
+        create_json_string(hp206c_altitude, json_buffer);
+        uart_send(json_buffer);
+
+        si1145_vis.value = si1145_getVisible();
+        si1145_vis.timestamp = HAL_GetTick();
+        create_json_string(si1145_vis, json_buffer);
+        uart_send(json_buffer);
+
+        si1145_ir.value = si1145_getIR();
+        si1145_ir.timestamp = HAL_GetTick();
+        create_json_string(si1145_ir, json_buffer);
+        uart_send(json_buffer);
+
+        th02_humidity.value = th02_get_humidity();
+        th02_humidity.timestamp = HAL_GetTick();
+        create_json_string(th02_humidity, json_buffer);
+        uart_send(json_buffer);
+
+        th02_temperature.value = th02_get_temperature();
+        th02_temperature.timestamp = HAL_GetTick();
+        create_json_string(th02_temperature, json_buffer);
+        uart_send(json_buffer);
+
         uint16_t size = strlen((char *)json_buffer);
-        HAL_Delay(900);
+        HAL_Delay(1000);
     }
   /* USER CODE END 3 */
 
