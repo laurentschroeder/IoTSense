@@ -15,4 +15,5 @@ extern UART_HandleTypeDef huart2;
 void uart_send(uint8_t *buffer)
 {
     HAL_UART_Transmit(&huart2, buffer, strlen((char *)buffer), 100);
+    HAL_Delay(100);
 }
