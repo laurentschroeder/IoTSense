@@ -127,6 +127,9 @@
 
 extern I2C_HandleTypeDef hi2c1;
 
+float vis_count = 0;
+float ir_count = 0;
+
 static uint8_t ReadFromRegister(uint8_t reg);
 static void WriteToRegister(uint8_t reg, uint8_t value);
 static void ParamSet(uint8_t address, uint8_t value);
@@ -141,7 +144,7 @@ void si1145_init(enum E_Operation operation)
     WriteToRegister(HW_KEY, 0x17);
     HAL_Delay(10);
 
-    if(operation == INDOOR)
+    if(operation == INDOOR_BULB || INDOOR_FLUORESCENT)
     {
         //Set integration time to 25.6 µs
         //Resolution 6 lx
@@ -158,6 +161,18 @@ void si1145_init(enum E_Operation operation)
          */
         uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
         ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_NORMAL);
+
+        if(operation == INDOOR_BULB)
+        {
+            vis_count = 0.319;
+            ir_count = 8.46;
+        }
+        else
+        {
+            vis_count = 0.146;
+            ir_count = 0.71;
+        }
+
     }
     else if(operation == OUTDOOR)
     {
@@ -170,6 +185,9 @@ void si1145_init(enum E_Operation operation)
          */
         uint8_t temp = ParamGet(ALS_IR_ADC_MISC);
         ParamSet(ALS_IR_ADC_MISC, temp & IR_RANGE_HIGH);
+
+        vis_count = 0.282;
+        ir_count = 2.44;
 
     }
     else if(operation == HIGH_SENSITIVE)
@@ -225,15 +243,13 @@ static uint8_t ParamGet(uint8_t address)
     return message;
 }
 
-
-
 static void si1145_force(void)
 {
     WriteToRegister(COMMAND, ALS_FORCE);
     HAL_Delay(5);
 }
 
-uint16_t si1145_getVisible(void)
+uint16_t si1145_getVisible_raw(void)
 {
     ParamSet(CHLIST, EN_ALS_VIS);
     si1145_force();
@@ -251,7 +267,7 @@ uint16_t si1145_getVisible(void)
     }
 }
 
-uint16_t si1145_getIR(void)
+uint16_t si1145_getIR_raw(void)
 {
     ParamSet(CHLIST, EN_ALS_IR);
     si1145_force();
@@ -278,6 +294,20 @@ uint16_t si1145_getUVIndex(void)
     uint8_t uv1 = ReadFromRegister(UVINDEX1);
     data = (uint16_t)uv0 | (uv1 << 8);
     return data;
+}
+
+float si1145_getVisible(void)
+{
+    float visible = si1145_getVisible_raw();
+    visible /= vis_count;
+    return visible;
+}
+
+float si1145_getIR(void)
+{
+    float ir = si1145_getIR_raw();
+    ir /= ir_count;
+    return ir;
 }
 
 uint8_t si1145_getResponse(void)

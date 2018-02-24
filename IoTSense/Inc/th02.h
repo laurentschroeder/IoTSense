@@ -8,7 +8,7 @@
 #ifndef TH02_H_
 #define TH02_H_
 
-uint16_t th02_get_humidity();
-uint16_t th02_get_temperature();
+float th02_get_humidity();
+float th02_get_temperature();
 
 #endif /* TH02_H_ */

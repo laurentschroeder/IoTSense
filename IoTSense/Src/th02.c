@@ -6,6 +6,7 @@
  */
 
 #include "stm32f0xx_hal.h"
+#include "th02.h"
 
 #define SLAVE_ADDRESS   0x40
 
@@ -44,7 +45,7 @@ static void WriteToRegister(uint8_t reg, uint8_t value)
     HAL_I2C_Mem_Write(&hi2c2, SLAVE_ADDRESS<<1, reg, I2C_MEMADD_SIZE_8BIT, &value, 1, 10);
 }
 
-uint16_t th02_get_humidity()
+uint16_t th02_get_humidity_raw()
 {
     WriteToRegister(CONFIG_REG, START);
     while(ReadFromRegister(STATUS_REG) & RDY)
@@ -54,11 +55,41 @@ uint16_t th02_get_humidity()
     return humidity >> 4;
 }
 
-uint16_t th02_get_temperature()
+uint16_t th02_get_temperature_raw()
 {
     WriteToRegister(CONFIG_REG, START | TEMP);
     while(ReadFromRegister(STATUS_REG) & RDY)
         HAL_Delay(10);
     uint16_t temperature = Read2ByteFromRegister(DATAh_REG);
     return temperature >> 2;
+}
+
+float th02_get_humidity()
+{
+    float humidity_raw = th02_get_humidity_raw();
+    humidity_raw /= 16;
+    humidity_raw -= 24;
+
+    // Linearization
+    float a0 = -4.7844;
+    float a1 = 0.4008;
+    float a2 = -0.00393;
+    float humidity_linear = humidity_raw - ((humidity_raw * humidity_raw) * a2 + humidity_raw * a1 + a0);
+
+    // Temperature compensation
+    float q0 = 0.1973;
+    float q1 = 0.00237;
+
+    float temperature = th02_get_temperature();
+    float humidity_compensated = humidity_linear + ((temperature - 30)) * (humidity_linear * q1 + q0);
+
+    return humidity_compensated;
+}
+
+float th02_get_temperature()
+{
+    float temperature = th02_get_temperature_raw();
+    temperature /= 32;
+    temperature -= 50;
+    return temperature;
 }

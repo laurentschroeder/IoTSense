@@ -69,7 +69,7 @@ static void hp206c_performConversion(void)
     HAL_Delay(50);
 }
 
-uint32_t hp206c_getTemperature(void)
+uint32_t hp206c_getTemperature_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_T;
@@ -77,7 +77,7 @@ uint32_t hp206c_getTemperature(void)
     return hp206c_read3Bytes();
 }
 
-uint32_t hp206c_getPressure(void)
+uint32_t hp206c_getPressure_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_P;
@@ -85,7 +85,7 @@ uint32_t hp206c_getPressure(void)
     return hp206c_read3Bytes();
 }
 
-uint32_t hp206c_getAltitude(void)
+uint32_t hp206c_getAltitude_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_A;
@@ -99,6 +99,21 @@ static void hp206c_writeRegister(uint8_t reg, uint8_t value)
     command[0] = WRITE_REG_HP206C | reg;
     command[1] = value;
     HAL_I2C_Master_Transmit(&hi2c1, SLAVE_ADDRESS, command, 2, 100);
+}
+
+float hp206c_getTemperature(void)
+{
+    return hp206c_getTemperature_raw() / 100;
+}
+
+float hp206c_getPressure(void)
+{
+    return hp206c_getPressure_raw() / 100;
+}
+
+float hp206c_getAltitude(void)
+{
+    return hp206c_getAltitude_raw() / 100;
 }
 
 /*

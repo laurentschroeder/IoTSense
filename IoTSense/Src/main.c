@@ -142,7 +142,7 @@ int main(void)
             "th02", "Temperatur", "\u00B0C", "Wohnzimmer");
 
     hp206c_init();
-    si1145_init(INDOOR);
+    si1145_init(INDOOR_BULB);
 
 
   /* USER CODE END 2 */
@@ -188,9 +188,6 @@ int main(void)
         th02_temperature.timestamp = HAL_GetTick();
         create_json_string(th02_temperature, json_buffer);
         uart_send(json_buffer);
-
-        uint16_t size = strlen((char *)json_buffer);
-        HAL_Delay(1000);
     }
   /* USER CODE END 3 */
 

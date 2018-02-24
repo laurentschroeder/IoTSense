@@ -9,9 +9,8 @@
 #define HP206C_H_
 
 void hp206c_init(void);
-void hp206c_performConversion(void);
-uint32_t hp206c_getTemperature(void);
-uint32_t hp206c_getPressure(void);
-uint32_t hp206c_getAltitude(void);
+float hp206c_getTemperature(void);
+float hp206c_getPressure(void);
+float hp206c_getAltitude(void);
 
 #endif /* HP206C_H_ */
