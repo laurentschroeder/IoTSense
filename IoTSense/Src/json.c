@@ -36,12 +36,13 @@ void create_json_object(json_obj *json_object, uint8_t id, uint8_t sub_id,
         char name[], char measure_type[], char unit[],
         char room[])
 {
+    memset(json_object, 0, sizeof(json_object));
     json_object->id = id;
     json_object->sub_id = sub_id;
-    strcpy(json_object->name, name);
-    strcpy(json_object->measure_type, measure_type);
+    strncpy(json_object->name, name,sizeof(json_object->name)-1);
+    strncpy(json_object->measure_type, measure_type, sizeof(json_object->measure_type)-1);
     json_object->value = 0;
-    strcpy(json_object->unit, unit);
-    strcpy(json_object->room, room);
+    strncpy(json_object->unit, unit, sizeof(json_object->unit)-1);
+    strncpy(json_object->room, room, sizeof(json_object->room)-1);
     json_object->timestamp = HAL_GetTick();
 }
