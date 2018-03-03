@@ -47,9 +47,6 @@
 
 /* Private define ------------------------------------------------------------*/
 
-#define WLAN_INT_Pin GPIO_PIN_2
-#define WLAN_INT_GPIO_Port GPIOF
-
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 
