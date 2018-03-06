@@ -20,7 +20,7 @@ void create_json_string(json_obj sensor, uint8_t *buffer)
             "\"Messwert\":%ld,"
             "\"Einheit\":\"%s\","
             "\"Raum\":\"%s\","
-            "\"Zeitstempel\":%ld}",
+            "\"Zeitstempel\":\"%s\"}",
             sensor.id,
             sensor.sub_id,
             sensor.name,
@@ -44,5 +44,4 @@ void create_json_object(json_obj *json_object, uint8_t id, uint8_t sub_id,
     json_object->value = 0;
     strncpy(json_object->unit, unit, sizeof(json_object->unit)-1);
     strncpy(json_object->room, room, sizeof(json_object->room)-1);
-    json_object->timestamp = HAL_GetTick();
 }

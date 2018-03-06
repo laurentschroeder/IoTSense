@@ -10,6 +10,8 @@
 #include "stdlib.h"
 
 extern RTC_HandleTypeDef hrtc;
+RTC_DateTypeDef date;
+RTC_TimeTypeDef time;
 
 uint8_t time_received = 0;
 
@@ -21,7 +23,7 @@ void wait_for_time(void)
     }
 }
 
-void unlock_time(char *timestring)
+void set_time(char *timestring)
 {
     char delimiter[] = " :";
     char *ptr;
@@ -39,8 +41,6 @@ void unlock_time(char *timestring)
         ptr = strtok(NULL, delimiter);
     }
 
-    RTC_DateTypeDef date;
-    RTC_TimeTypeDef time;
     if(strcmp(parameters[2], "Mon") == 0)
     {
         date.WeekDay = RTC_WEEKDAY_MONDAY;
@@ -132,4 +132,17 @@ void unlock_time(char *timestring)
     HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
     HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
 
+    time_received = 1;
+}
+
+void get_time(char * time_string)
+{
+    RTC_TimeTypeDef sTime;
+    RTC_DateTypeDef sDate;
+
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+    sprintf(time_string, "%02d-%02d-%02d  %02d:%02d:%02d", sDate.Date, sDate.Month,
+            sDate.Year, sTime.Hours, sTime.Minutes, sTime.Seconds);
 }

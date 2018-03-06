@@ -18,7 +18,7 @@ typedef struct {
     uint32_t value;
     char unit[10];
     char room[20];
-    uint32_t timestamp;
+    char timestamp[20];
 } json_obj;
 
 void create_json_string(json_obj sensor, uint8_t *buffer);

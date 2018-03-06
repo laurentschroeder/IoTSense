@@ -53,7 +53,7 @@ static void uart_parse_command(uint8_t command[])
         strncpy(str2, (char *) command, 8);
         if(strncmp(str1, str2, 8) == 0)
         {
-            unlock_time((char *)command);
+            set_time((char *)command);
         }
     }
 }

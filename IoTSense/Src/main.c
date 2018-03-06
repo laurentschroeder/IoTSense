@@ -164,37 +164,37 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
         hp206c_temperature.value = hp206c_getTemperature();
-        hp206c_temperature.timestamp = HAL_GetTick();
+        get_time(hp206c_temperature.timestamp);
         create_json_string(hp206c_temperature, json_buffer);
         uart_send(json_buffer);
 
         hp206c_pressure.value = hp206c_getPressure();
-        hp206c_pressure.timestamp = HAL_GetTick();
+        get_time(hp206c_pressure.timestamp);
         create_json_string(hp206c_pressure, json_buffer);
         uart_send(json_buffer);
 
         hp206c_altitude.value = hp206c_getAltitude();
-        hp206c_altitude.timestamp = HAL_GetTick();
+        get_time(hp206c_altitude.timestamp);
         create_json_string(hp206c_altitude, json_buffer);
         uart_send(json_buffer);
 
         si1145_vis.value = si1145_getVisible();
-        si1145_vis.timestamp = HAL_GetTick();
+        get_time(si1145_vis.timestamp);
         create_json_string(si1145_vis, json_buffer);
         uart_send(json_buffer);
 
         si1145_ir.value = si1145_getIR();
-        si1145_ir.timestamp = HAL_GetTick();
+        get_time(si1145_ir.timestamp);
         create_json_string(si1145_ir, json_buffer);
         uart_send(json_buffer);
 
         th02_humidity.value = th02_get_humidity();
-        th02_humidity.timestamp = HAL_GetTick();
+        get_time(th02_humidity.timestamp);
         create_json_string(th02_humidity, json_buffer);
         uart_send(json_buffer);
 
         th02_temperature.value = th02_get_temperature();
-        th02_temperature.timestamp = HAL_GetTick();
+        get_time(th02_temperature.timestamp);
         create_json_string(th02_temperature, json_buffer);
         uart_send(json_buffer);
     }
@@ -337,6 +337,9 @@ static void MX_I2C2_Init(void)
 static void MX_RTC_Init(void)
 {
 
+  RTC_TimeTypeDef sTime;
+  RTC_DateTypeDef sDate;
+
     /**Initialize RTC Only 
     */
   hrtc.Instance = RTC;
@@ -349,6 +352,32 @@ static void MX_RTC_Init(void)
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Initialize RTC and set the Time and Date 
+    */
+  sTime.Hours = 0;
+  sTime.Minutes = 0;
+  sTime.Seconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 1;
+  sDate.Year = 0;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
+    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
   }
 
 }
