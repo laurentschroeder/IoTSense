@@ -11,7 +11,7 @@
 #include <string.h>
 #include "time.h"
 
-#define COMMAND_MAX_SIZE 20
+#define COMMAND_MAX_SIZE 200
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
@@ -53,7 +53,7 @@ static void uart_parse_command(uint8_t command[])
         strncpy(str2, (char *) command, 8);
         if(strncmp(str1, str2, 8) == 0)
         {
-            unlock_time();
+            unlock_time((char *)command);
         }
     }
 }

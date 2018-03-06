@@ -9,6 +9,6 @@
 #define TIME_H_
 
 void wait_for_time(void);
-void unlock_time(void);
+void unlock_time(char *timestring);
 
 #endif /* TIME_H_ */
