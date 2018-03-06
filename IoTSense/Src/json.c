@@ -36,7 +36,7 @@ void create_json_object(json_obj *json_object, uint8_t id, uint8_t sub_id,
         char name[], char measure_type[], char unit[],
         char room[])
 {
-    memset(json_object, 0, sizeof(json_object));
+    memset(json_object, 0, sizeof(*json_object));
     json_object->id = id;
     json_object->sub_id = sub_id;
     strncpy(json_object->name, name,sizeof(json_object->name)-1);
