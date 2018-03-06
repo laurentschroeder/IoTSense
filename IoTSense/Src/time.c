@@ -123,7 +123,11 @@ void unlock_time(char *timestring)
     time.Hours = (uint8_t)atoi(parameters[5]);
     time.Minutes = (uint8_t)atoi(parameters[6]);
     time.Seconds = (uint8_t)atoi(parameters[7]);
-    date.Year = (uint8_t)atoi(parameters[8]);
+
+    char shortyear[2];
+    shortyear[0] = parameters[8][2];
+    shortyear[1] = parameters[8][3];
+    date.Year = (uint8_t)atoi(shortyear);
 
     HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
     HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
