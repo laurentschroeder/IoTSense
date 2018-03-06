@@ -10,8 +10,6 @@
 #include "stdlib.h"
 
 extern RTC_HandleTypeDef hrtc;
-RTC_DateTypeDef date;
-RTC_TimeTypeDef time;
 
 uint8_t time_received = 0;
 
@@ -25,6 +23,9 @@ void wait_for_time(void)
 
 void set_time(char *timestring)
 {
+    RTC_DateTypeDef date;
+    RTC_TimeTypeDef time;
+
     char delimiter[] = " :";
     char *ptr;
     char *parameters[9];

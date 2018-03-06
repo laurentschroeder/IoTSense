@@ -38,12 +38,6 @@ static void uart_parse_command(uint8_t command[])
         char *msg = "\n\rSucces Laurent!\r\n";
         HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 100);
     }
-    else if(strcmp("2000\r\n", (char *)command) == 0)
-    {
-        // call corresponding function from time.c
-        char *msg = "\n\rAgain succes Laurent!\r\n";
-        HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 100);
-    }
     else if(strlen((char *)command) > 8)
     {
         //HAL_UART_Transmit(&huart2, (uint8_t *)command, strlen(command), 100);
