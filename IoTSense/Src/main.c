@@ -48,6 +48,7 @@
 #include "uart.h"
 #include "json.h"
 #include "time.h"
+#include "mh-z16.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -124,6 +125,7 @@ int main(void)
     json_obj si1145_ir;
     json_obj th02_humidity;
     json_obj th02_temperature;
+    json_obj mhz16_co2;
 
     create_json_object(&hp206c_temperature, 1, 1,
             "hp206c", "Temperatur", "\u00B0C", "Wohnzimmer");
@@ -145,6 +147,9 @@ int main(void)
 
     create_json_object(&th02_temperature, 3, 2,
             "th02", "Temperatur", "\u00B0C", "Wohnzimmer");
+
+    create_json_object(&mhz16_co2, 4, 1,
+            "mh-z16", "CO2", "ppm", "Wohnzimmer");
 
     hp206c_init();
     si1145_init(INDOOR_BULB);
@@ -196,6 +201,11 @@ int main(void)
         th02_temperature.value = th02_get_temperature();
         get_time(th02_temperature.timestamp);
         create_json_string(th02_temperature, json_buffer);
+        uart_send(json_buffer);
+
+        mhz16_co2.value = mhz16_get_value();
+        get_time(mhz16_co2.timestamp);
+        create_json_string(mhz16_co2, json_buffer);
         uart_send(json_buffer);
     }
   /* USER CODE END 3 */
@@ -387,10 +397,10 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 230400;
-  huart1.Init.WordLength = UART_WORDLENGTH_9B;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_EVEN;
+  huart1.Init.Parity = UART_PARITY_NONE;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;

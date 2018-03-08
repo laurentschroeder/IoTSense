@@ -54,7 +54,9 @@ static void uart_parse_command(uint8_t command[])
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if(i<COMMAND_MAX_SIZE)
+    if(huart==&huart2)
+    {
+        if(i<COMMAND_MAX_SIZE)
         {
             command_buffer[i] = uart_rec_data;
             i++;
@@ -76,4 +78,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             i = 0;
         }
         HAL_UART_Receive_IT(&huart2, &uart_rec_data, 1);
+    }
+
+
 }
