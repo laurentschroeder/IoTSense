@@ -27,7 +27,7 @@ static uint16_t Read2ByteFromRegister(uint8_t reg);
 
 static uint8_t ReadFromRegister(uint8_t reg)
 {
-    uint8_t message;
+    uint8_t message = 0;
     HAL_I2C_Mem_Read(&hi2c2, SLAVE_ADDRESS<<1, reg, I2C_MEMADD_SIZE_8BIT, &message, 1, 10);
     return message;
 }
@@ -67,6 +67,10 @@ uint16_t th02_get_temperature_raw()
 float th02_get_humidity()
 {
     float humidity_raw = th02_get_humidity_raw();
+    if(humidity_raw == 0)
+    {
+        return 0;
+    }
     humidity_raw /= 16;
     humidity_raw -= 24;
 
@@ -89,6 +93,10 @@ float th02_get_humidity()
 float th02_get_temperature()
 {
     float temperature = th02_get_temperature_raw();
+    if(temperature == 0)
+    {
+        return 0;
+    }
     temperature /= 32;
     temperature -= 50;
     return temperature;

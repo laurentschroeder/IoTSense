@@ -62,11 +62,11 @@
 #define PS_ADC_Clock_1     0x00    //50 ns times 2^PS_ADC_GAIN
 #define PS_ADC_Clock_7     0x10    //350 ns times 2^PS_ADC_GAIN
 #define PS_ADC_Clock_15    0x20    //750 ns times 2^PS_ADC_GAIN
-#define PS_ADC_Clock_31    0x30    //1.55 µs times 2^PS_ADC_GAIN
-#define PS_ADC_Clock_63    0x40    //3.15 µs times 2^PS_ADC_GAIN
-#define PS_ADC_Clock_127   0x50    //6.35 µs times 2^PS_ADC_GAIN
-#define PS_ADC_Clock_255   0x60    //12.75 µs times 2^PS_ADC_GAIN
-#define PS_ADC_Clock_511   0x70    //25.55 µs times 2^PS_ADC_GAIN
+#define PS_ADC_Clock_31    0x30    //1.55 ï¿½s times 2^PS_ADC_GAIN
+#define PS_ADC_Clock_63    0x40    //3.15 ï¿½s times 2^PS_ADC_GAIN
+#define PS_ADC_Clock_127   0x50    //6.35 ï¿½s times 2^PS_ADC_GAIN
+#define PS_ADC_Clock_255   0x60    //12.75 ï¿½s times 2^PS_ADC_GAIN
+#define PS_ADC_Clock_511   0x70    //25.55 ï¿½s times 2^PS_ADC_GAIN
 
 #define PS_ADC_GAIN     0x0B
 #define PS_ADC_CLOCK_DIV1   0x00
@@ -88,10 +88,10 @@
 #define VIS_ADC_Clock_7    0x10    //350 ns times 2^ALS_VIS_ADC_GAIN
 #define VIS_ADC_Clock_15   0x20    //750 ns times 2^ALS_VIS_ADC_GAIN
 #define VIS_ADC_Clock_31   0x30    //1.55 ms times 2^ALS_VIS_ADC_GAIN
-#define VIS_ADC_Clock_63   0x40    //3.15 µs times 2^ALS_VIS_ADC_GAIN
-#define VIS_ADC_Clock_127  0x50    //6.35 µs times 2^ALS_VIS_ADC_GAIN
-#define VIS_ADC_Clock_255  0x60    //12.75 µs times 2^ALS_VIS_ADC_GAIN
-#define VIS_ADC_Clock_511  0x70    //25.55 µs times 2^ALS_VIS_ADC_GAIN
+#define VIS_ADC_Clock_63   0x40    //3.15 ï¿½s times 2^ALS_VIS_ADC_GAIN
+#define VIS_ADC_Clock_127  0x50    //6.35 ï¿½s times 2^ALS_VIS_ADC_GAIN
+#define VIS_ADC_Clock_255  0x60    //12.75 ï¿½s times 2^ALS_VIS_ADC_GAIN
+#define VIS_ADC_Clock_511  0x70    //25.55 ï¿½s times 2^ALS_VIS_ADC_GAIN
 
 #define ALS_VIS_ADC_GAIN    0x11
 #define VIS_ADC_CLOCK_DIV1      0x00
@@ -112,11 +112,11 @@
 #define IR_ADC_Clock_1      0x00    //50 ns times 2^ALS_IR_ADC_GAIN
 #define IR_ADC_Clock_7      0x10    //350 ns times 2^ALS_IR_ADC_GAIN
 #define IR_ADC_Clock_15     0x20    //750 ns times 2^ALS_IR_ADC_GAIN
-#define IR_ADC_Clock_31     0x30    //1.55 µs times 2^ALS_IR_ADC_GAIN
-#define IR_ADC_Clock_63     0x40    //3.15 µs times 2^ALS_IR_ADC_GAIN
-#define IR_ADC_Clock_127    0x50    //6.35 µs times 2^ALS_IR_ADC_GAIN
-#define IR_ADC_Clock_255    0x60    //12.75 µs times 2^ALS_IR_ADC_GAIN
-#define IR_ADC_Clock_511    0x70    //25.55 µs times 2^ALS_IR_ADC_GAIN
+#define IR_ADC_Clock_31     0x30    //1.55 ï¿½s times 2^ALS_IR_ADC_GAIN
+#define IR_ADC_Clock_63     0x40    //3.15 ï¿½s times 2^ALS_IR_ADC_GAIN
+#define IR_ADC_Clock_127    0x50    //6.35 ï¿½s times 2^ALS_IR_ADC_GAIN
+#define IR_ADC_Clock_255    0x60    //12.75 ï¿½s times 2^ALS_IR_ADC_GAIN
+#define IR_ADC_Clock_511    0x70    //25.55 ï¿½s times 2^ALS_IR_ADC_GAIN
 
 #define ALS_IR_ADC_GAIN        0x1E
 #define IR_ADC_CLOCK_DIV1      0x00
@@ -146,7 +146,7 @@ void si1145_init(enum E_Operation operation)
 
     if(operation == INDOOR_BULB || INDOOR_FLUORESCENT)
     {
-        //Set integration time to 25.6 µs
+        //Set integration time to 25.6 ï¿½s
         //Resolution 6 lx
         ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_255);
         ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV2);
@@ -192,7 +192,7 @@ void si1145_init(enum E_Operation operation)
     }
     else if(operation == HIGH_SENSITIVE)
     {
-        //HIGH_SENSITIVE mode, set integration time to 410 µs
+        //HIGH_SENSITIVE mode, set integration time to 410 ï¿½s
         //Resolution 1 lx
         ParamSet(ALS_VIS_ADC_COUNTER, VIS_ADC_Clock_127);
         ParamSet(ALS_VIS_ADC_GAIN, VIS_ADC_CLOCK_DIV64);
@@ -220,7 +220,7 @@ void si1145_init(enum E_Operation operation)
 
 static uint8_t ReadFromRegister(uint8_t reg)
 {
-    uint8_t message;
+    uint8_t message = 0;
     HAL_I2C_Mem_Read(&hi2c1, SLAVE_ADDRESS<<1, reg, I2C_MEMADD_SIZE_8BIT, &message, 1, 100);
     return message;
 }
