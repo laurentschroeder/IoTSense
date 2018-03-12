@@ -10,7 +10,7 @@
 extern UART_HandleTypeDef huart1;
 uint8_t uart_response[9];
 
-uint16_t mhz16_get_value()
+uint16_t mhz16_get_value(void)
 {
     uint8_t uart_request[] = {0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79};
     HAL_UART_Transmit(&huart1, uart_request, 9, 100);
