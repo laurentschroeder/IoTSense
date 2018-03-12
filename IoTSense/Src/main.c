@@ -52,6 +52,8 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc;
+
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
@@ -74,6 +76,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_RTC_Init(void);
+static void MX_ADC_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -114,6 +117,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C2_Init();
   MX_RTC_Init();
+  MX_ADC_Init();
 
   /* USER CODE BEGIN 2 */
     uint8_t json_buffer[180];
@@ -126,6 +130,7 @@ int main(void)
     json_obj th02_humidity;
     json_obj th02_temperature;
     json_obj mhz16_co2;
+    json_obj mp503;
 
     create_json_object(&hp206c_temperature, 1, 1,
             "hp206c", "Temperatur", "\u00B0C", "Wohnzimmer");
@@ -150,6 +155,9 @@ int main(void)
 
     create_json_object(&mhz16_co2, 4, 1,
             "mh-z16", "CO2", "ppm", "Wohnzimmer");
+
+    create_json_object(&mp503, 5, 1,
+            "mp503", "Verschmutzung", "Grad", "Wohnzimmer");
 
     hp206c_init();
     si1145_init(INDOOR_BULB);
@@ -206,6 +214,11 @@ int main(void)
         mhz16_co2.value = mhz16_get_value();
         get_time(mhz16_co2.timestamp);
         create_json_string(mhz16_co2, json_buffer);
+        uart_send(json_buffer);
+
+        mp503.value = mp503_get_value();
+        get_time(mp503.timestamp);
+        create_json_string(mp503, json_buffer);
         uart_send(json_buffer);
     }
   /* USER CODE END 3 */
@@ -273,6 +286,45 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+}
+
+/* ADC init function */
+static void MX_ADC_Init(void)
+{
+
+  ADC_ChannelConfTypeDef sConfig;
+
+    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+    */
+  hadc.Instance = ADC1;
+  hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
+  hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc.Init.LowPowerAutoWait = DISABLE;
+  hadc.Init.LowPowerAutoPowerOff = DISABLE;
+  hadc.Init.ContinuousConvMode = DISABLE;
+  hadc.Init.DiscontinuousConvMode = DISABLE;
+  hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc.Init.DMAContinuousRequests = DISABLE;
+  hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  if (HAL_ADC_Init(&hadc) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }
 
 /* I2C1 init function */
@@ -447,8 +499,8 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
 }
