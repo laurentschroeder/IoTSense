@@ -164,8 +164,7 @@ int main(void)
     uart_receive_enable();
     //uart_send((uint8_t *)"IoTSense v 1.0\n");
 
-    wait_for_time();
-//    wait_for_time();
+    time_sync();
 
   /* USER CODE END 2 */
 

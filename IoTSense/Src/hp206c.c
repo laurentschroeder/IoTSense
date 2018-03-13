@@ -69,7 +69,7 @@ static void hp206c_performConversion(void)
     HAL_Delay(50);
 }
 
-uint32_t hp206c_getTemperature_raw(void)
+static uint32_t hp206c_getTemperature_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_T;
@@ -77,7 +77,7 @@ uint32_t hp206c_getTemperature_raw(void)
     return hp206c_read3Bytes();
 }
 
-uint32_t hp206c_getPressure_raw(void)
+static uint32_t hp206c_getPressure_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_P;
@@ -85,7 +85,7 @@ uint32_t hp206c_getPressure_raw(void)
     return hp206c_read3Bytes();
 }
 
-uint32_t hp206c_getAltitude_raw(void)
+static uint32_t hp206c_getAltitude_raw(void)
 {
     hp206c_performConversion();
     uint8_t command = READ_A;

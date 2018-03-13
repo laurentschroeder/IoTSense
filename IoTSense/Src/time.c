@@ -13,7 +13,7 @@ extern RTC_HandleTypeDef hrtc;
 
 uint8_t time_received = 0;
 
-void wait_for_time(void)
+void time_sync(void)
 {
     while(time_received != 1)
     {

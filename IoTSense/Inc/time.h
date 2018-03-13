@@ -11,7 +11,7 @@
 /**
  * @brief Set the MCU in wait state, until time sync
  */
-void wait_for_time(void);
+void time_sync(void);
 
 /**
  * @brief set the RTC values

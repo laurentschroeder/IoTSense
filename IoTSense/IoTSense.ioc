@@ -1,8 +1,20 @@
 #MicroXplorer Configuration settings - do not modify
 ADC.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4
-ADC.IPParameters=ClockPrescaler,Resolution,SamplingTime
+ADC.ContinuousConvMode=DISABLE
+ADC.DMAContinuousRequests=DISABLE
+ADC.DataAlign=ADC_DATAALIGN_RIGHT
+ADC.DiscontinuousConvMode=DISABLE
+ADC.EOCSelection=ADC_EOC_SINGLE_CONV
+ADC.EnableAnalogWatchDog=false
+ADC.ExternalTrigConv=ADC_SOFTWARE_START
+ADC.ExternalTrigConvEdge=ADC_EXTERNALTRIGCONVEDGE_NONE
+ADC.IPParameters=ClockPrescaler,Resolution,SamplingTime,DataAlign,ScanConvMode,ContinuousConvMode,DiscontinuousConvMode,DMAContinuousRequests,EOCSelection,Overrun,LowPowerAutoWait,LowPowerAutoPowerOff,ExternalTrigConv,ExternalTrigConvEdge,EnableAnalogWatchDog
+ADC.LowPowerAutoPowerOff=DISABLE
+ADC.LowPowerAutoWait=DISABLE
+ADC.Overrun=ADC_OVR_DATA_PRESERVED
 ADC.Resolution=ADC_RESOLUTION_8B
 ADC.SamplingTime=ADC_SAMPLETIME_28CYCLES_5
+ADC.ScanConvMode=ADC_SCAN_DIRECTION_FORWARD
 File.Version=6
 I2C1.I2C_Speed_Mode=I2C_Standard
 I2C1.IPParameters=I2C_Speed_Mode,Timing

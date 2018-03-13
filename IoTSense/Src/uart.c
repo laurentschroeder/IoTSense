@@ -79,6 +79,4 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
         }
         HAL_UART_Receive_IT(&huart2, &uart_rec_data, 1);
     }
-
-
 }
