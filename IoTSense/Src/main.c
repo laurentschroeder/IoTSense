@@ -49,6 +49,7 @@
 #include "json.h"
 #include "time.h"
 #include "mh-z16.h"
+#include "mp503.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -120,7 +121,7 @@ int main(void)
   MX_ADC_Init();
 
   /* USER CODE BEGIN 2 */
-    uint8_t json_buffer[180];
+    uint8_t json_buffer[300];
 
     json_obj hp206c_temperature;
     json_obj hp206c_pressure;
@@ -157,7 +158,7 @@ int main(void)
             "mh-z16", "CO2", "ppm", "Wohnzimmer");
 
     create_json_object(&mp503, 5, 1,
-            "mp503", "Verschmutzung", "Grad", "Wohnzimmer");
+            "mp503", "Verschmutzung", "V", "Wohnzimmer");
 
     hp206c_init();
     si1145_init(INDOOR_BULB);
@@ -297,7 +298,7 @@ static void MX_ADC_Init(void)
     */
   hadc.Instance = ADC1;
   hadc.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc.Init.Resolution = ADC_RESOLUTION_10B;
   hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
   hadc.Init.EOCSelection = ADC_EOC_SINGLE_CONV;

@@ -8,6 +8,6 @@
 #ifndef MP503_H_
 #define MP503_H_
 
-uint16_t mp503_get_value();
+float mp503_get_value();
 
 #endif /* MP503_H_ */

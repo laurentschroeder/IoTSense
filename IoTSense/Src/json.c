@@ -17,7 +17,7 @@ void create_json_string(json_obj sensor, uint8_t *buffer)
             "\"Sensor Sub ID\":%u,"
             "\"Sensor\":\"%s\","
             "\"Art der Messung\":\"%s\","
-            "\"Messwert\":%ld,"
+            "\"Messwert\":\"%3.2f\","
             "\"Einheit\":\"%s\","
             "\"Raum\":\"%s\","
             "\"Zeitstempel\":\"%s\"}",

@@ -15,7 +15,7 @@ typedef struct {
     uint8_t sub_id;
     char name[20];
     char measure_type[20];
-    uint32_t value;
+    float value;
     char unit[10];
     char room[20];
     char timestamp[20];

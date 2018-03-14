@@ -9,12 +9,15 @@
 
 extern ADC_HandleTypeDef hadc;
 
-uint32_t mp503_get_value()
+static const float adc_voltage_ratio = 0.00322265625;
+
+float mp503_get_value(void)
 {
-    uint32_t value = 0;
+    float value = 0;
     HAL_ADC_Start(&hadc);
     HAL_ADC_PollForConversion(&hadc, 100);
     value = HAL_ADC_GetValue(&hadc);
     HAL_ADC_Stop(&hadc);
-    return value;
+    return value * adc_voltage_ratio;
 }
+
