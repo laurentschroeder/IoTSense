@@ -32,13 +32,7 @@ void uart_receive_enable(void)
 
 static void uart_parse_command(uint8_t command[])
 {
-    if(strcmp("get timestamp\r\n", (char *)command) == 0)
-    {
-        // call corresponding function from time.c
-        char *msg = "\n\rSucces Laurent!\r\n";
-        HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 100);
-    }
-    else if(strlen((char *)command) > 8)
+    if(strlen((char *)command) > 8)
     {
         //HAL_UART_Transmit(&huart2, (uint8_t *)command, strlen(command), 100);
         char str1[8];
