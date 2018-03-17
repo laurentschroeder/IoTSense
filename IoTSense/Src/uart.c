@@ -15,9 +15,9 @@
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
-uint8_t command_buffer[COMMAND_MAX_SIZE];
-uint8_t uart_rec_data;
-uint8_t i = 0;
+volatile uint8_t command_buffer[COMMAND_MAX_SIZE];
+volatile uint8_t uart_rec_data;
+volatile uint8_t i = 0;
 
 void uart_send(uint8_t *buffer)
 {
@@ -56,10 +56,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
             i++;
             if(uart_rec_data == '\n')
             {
-                uint8_t cmd_len = strlen((char *)command_buffer) + 1;
-                uint8_t command[cmd_len];
-                strncpy((char *)command, (char *)command_buffer, cmd_len);
-                uart_parse_command(command);
+                uart_parse_command(command_buffer);
                 i = 0;
                 memset(command_buffer, 0, sizeof(command_buffer));
             }

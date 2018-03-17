@@ -11,7 +11,7 @@
 
 extern RTC_HandleTypeDef hrtc;
 
-uint8_t time_received = 0;
+volatile uint8_t time_received = 0;
 
 void time_sync(void)
 {
